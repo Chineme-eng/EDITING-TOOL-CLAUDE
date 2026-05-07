@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editr — Video Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="video.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     LANDING
+════════════════════════════════ -->
+<div id="vLanding" class="screen active">
+  <div class="landing-bg">
+    <div class="grid-lines"></div>
+    <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+  </div>
+  <div class="landing-content">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="38" height="38" viewBox="0 0 36 36"><polygon points="18,2 34,10 34,26 18,34 2,26 2,10" fill="none" stroke="var(--accent)" stroke-width="2.5"/><polygon points="18,8 28,13 28,23 18,28 8,23 8,13" fill="var(--accent)" opacity="0.2"/><circle cx="18" cy="18" r="4" fill="var(--accent)"/></svg>
+      </div>
+      <h1 class="brand-name">editr</h1>
+      <span class="brand-tag">video</span>
+    </div>
+    <p class="landing-tagline">Trim. Cut. Export.</p>
+    <p class="landing-sub">Free browser-based video editor. Nothing leaves your device.</p>
+
+    <div class="upload-zone" id="vUploadZone">
+      <input type="file" id="vFileInput" accept="video/*" hidden />
+      <div class="upload-icon-wrap">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <rect x="4" y="10" width="40" height="28" rx="4" stroke="var(--accent)" stroke-width="2.5"/>
+          <path d="M18 18l12 6-12 6V18z" fill="var(--accent)"/>
+          <path d="M4 18h4M4 24h4M4 30h4M40 18h4M40 24h4M40 30h4" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="upload-main">Drop a video file here</p>
+      <p class="upload-hint">or <span class="upload-link">click to browse</span></p>
+      <div class="upload-formats">
+        <span>MP4</span><span>WEBM</span><span>MOV</span><span>AVI</span><span>MKV</span>
+      </div>
+    </div>
+
+    <div class="landing-nav">
+      <a href="index.html" class="nav-link">← Back to Image Editor</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     VIDEO EDITOR
+════════════════════════════════ -->
+<div id="vEditor" class="screen">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand mini">
+        <svg width="20" height="20" viewBox="0 0 36 36"><polygon points="18,2 34,10 34,26 18,34 2,26 2,10" fill="none" stroke="var(--accent)" stroke-width="2.5"/><circle cx="18" cy="18" r="4" fill="var(--accent)"/></svg>
+        <span class="brand-name">editr</span>
+        <span class="brand-tag sm">video</span>
+      </div>
+      <div class="dvdr"></div>
+      <span class="file-badge" id="vFileName">untitled</span>
+      <button class="btn-topbar" id="vAddBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add Video
+      </button>
+      <input type="file" id="vAddInput" accept="video/*" hidden />
+    </div>
+
+    <div class="topbar-center">
+      <button class="tbar-act" id="vUndoBtn">↩ Undo</button>
+      <button class="tbar-act" id="vRedoBtn">↪ Redo</button>
+      <div class="dvdr"></div>
+      <button class="tbar-act" id="splitBtn" title="Split clip at playhead (S)">✂ Split</button>
+      <button class="tbar-act" id="deleteClipBtn" title="Delete selected clip (Del)">🗑 Delete Clip</button>
+    </div>
+
+    <div class="topbar-right">
+      <button class="theme-toggle" id="vThemeToggle">
+        <span class="ti dark-i">🌙</span><span class="ti light-i">☀️</span>
+      </button>
+      <a href="index.html" class="btn-topbar">📷 Image Editor</a>
+      <div class="dl-wrap">
+        <button class="btn-primary" id="vExportBtn">⬇ Export Video</button>
+        <button class="btn-primary dl-arrow" id="vExportArrow">▾</button>
+        <div class="dl-menu hidden" id="vExportMenu">
+          <button class="dlm-btn" data-quality="high">High Quality (slow)</button>
+          <button class="dlm-btn" data-quality="medium">Standard (recommended)</button>
+          <button class="dlm-btn" data-quality="draft">Draft (fast preview)</button>
+          <div class="menu-sep"></div>
+          <button class="dlm-btn" data-format="gif">Export as GIF</button>
+          <button class="dlm-btn" data-format="webm">Export as WebM</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN EDITOR -->
+  <div class="veditor-body">
+
+    <!-- LEFT: TOOLS + OVERLAYS PANEL -->
+    <aside class="vtoolbar">
+
+      <div class="tg">
+        <div class="tg-label">Playback</div>
+        <div class="playback-btns">
+          <button class="vtool-btn" id="skipBackBtn" title="Skip back 5s">⏮ 5s</button>
+          <button class="vtool-btn big" id="vPlayBtn" title="Play/Pause (Space)">▶</button>
+          <button class="vtool-btn" id="skipFwdBtn" title="Skip forward 5s">5s ⏭</button>
+        </div>
+        <div class="time-display">
+          <span id="vCurrentTime">0:00.0</span>
+          <span class="time-sep">/</span>
+          <span id="vTotalTime">0:00.0</span>
+        </div>
+      </div>
+
+      <div class="tg">
+        <div class="tg-label">Add Overlay</div>
+        <button class="vtool-btn full" id="addTextBtn">T  Add Text</button>
+        <button class="vtool-btn full" id="addEmojiBtn">★  Add Emoji</button>
+        <button class="vtool-btn full" id="addGifBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M10 9v6M10 12h3M17 9v6M14 9h6"/></svg>
+          Add GIF
+        </button>
+        <button class="vtool-btn full" id="addImageBtn">🖼 Add Image</button>
+        <button class="vtool-btn full" id="addDrawBtn">✏ Draw</button>
+        <button class="vtool-btn full" id="addBlurBtn">⬡ Blur Region</button>
+        <input type="file" id="gifFileInput" accept="image/gif" hidden />
+        <input type="file" id="overlayImageInput" accept="image/*" hidden />
+      </div>
+
+      <div class="tg">
+        <div class="tg-label">Audio</div>
+        <button class="vtool-btn full" id="addAudioBtn">♪  Add Audio</button>
+        <input type="file" id="audioFileInput" accept="audio/*" hidden />
+        <div class="vol-row">
+          <span class="vol-label">Video Vol</span>
+          <input type="range" class="slider" id="videoVolume" min="0" max="100" value="100" />
+          <span class="sl-out" id="videoVolVal">100%</span>
+        </div>
+        <label class="check-row">
+          <input type="checkbox" id="muteVideoAudio" /> Mute original
+        </label>
+      </div>
+
+      <div class="tg">
+        <div class="tg-label">Speed</div>
+        <div class="speed-btns">
+          <button class="spd-btn" data-speed="0.25">0.25×</button>
+          <button class="spd-btn" data-speed="0.5">0.5×</button>
+          <button class="spd-btn active" data-speed="1">1×</button>
+          <button class="spd-btn" data-speed="1.5">1.5×</button>
+          <button class="spd-btn" data-speed="2">2×</button>
+        </div>
+      </div>
+
+      <div class="tg">
+        <div class="tg-label">Filters</div>
+        <div class="filter-grid">
+          <button class="filt-btn active" data-filter="none">None</button>
+          <button class="filt-btn" data-filter="grayscale(1)">B&W</button>
+          <button class="filt-btn" data-filter="sepia(0.8)">Sepia</button>
+          <button class="filt-btn" data-filter="contrast(1.3) saturate(1.4)">Vivid</button>
+          <button class="filt-btn" data-filter="brightness(1.1) contrast(0.9)">Soft</button>
+          <button class="filt-btn" data-filter="hue-rotate(180deg)">Invert H</button>
+          <button class="filt-btn" data-filter="saturate(0.3) brightness(0.9)">Muted</button>
+          <button class="filt-btn" data-filter="contrast(1.5) brightness(0.85)">Cinematic</button>
+        </div>
+      </div>
+
+      <div class="tg">
+        <div class="tg-label">Aspect Ratio</div>
+        <div class="ratio-btns">
+          <button class="ratio-btn active" data-ratio="source">Source</button>
+          <button class="ratio-btn" data-ratio="16:9">16:9</button>
+          <button class="ratio-btn" data-ratio="9:16">9:16</button>
+          <button class="ratio-btn" data-ratio="1:1">1:1</button>
+          <button class="ratio-btn" data-ratio="4:3">4:3</button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- CENTER: PREVIEW + TIMELINE -->
+    <div class="vcenter">
+
+      <!-- PREVIEW -->
+      <div class="preview-area" id="previewArea">
+        <div class="preview-wrap" id="previewWrap">
+          <canvas id="previewCanvas"></canvas>
+          <canvas id="overlayCanvas"></canvas>
+          <!-- Overlays rendered here -->
+          <div class="overlay-layer" id="overlayLayer"></div>
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="timeline-panel" id="timelinePanel">
+
+        <div class="tl-header">
+          <span class="tl-title">Timeline</span>
+          <div class="tl-controls">
+            <button class="tbar-act sm" id="tlZoomOut">− Zoom</button>
+            <input type="range" id="tlZoom" min="1" max="20" value="3" class="slider" style="width:80px" />
+            <button class="tbar-act sm" id="tlZoomIn">+ Zoom</button>
+          </div>
+        </div>
+
+        <!-- RULER -->
+        <div class="tl-ruler-wrap">
+          <div class="tl-track-label"></div>
+          <div class="tl-ruler" id="tlRuler"></div>
+        </div>
+
+        <!-- VIDEO TRACK -->
+        <div class="tl-row" id="videoTrackRow">
+          <div class="tl-track-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M17 10l-5 3 5 3V10z" fill="currentColor" stroke="none"/></svg>
+            Video
+          </div>
+          <div class="tl-track" id="videoTrack">
+            <div class="tl-playhead" id="tlPlayhead"></div>
+          </div>
+        </div>
+
+        <!-- AUDIO TRACK -->
+        <div class="tl-row" id="audioTrackRow">
+          <div class="tl-track-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            Audio
+          </div>
+          <div class="tl-track" id="audioTrack"></div>
+        </div>
+
+        <!-- OVERLAY TRACK -->
+        <div class="tl-row">
+          <div class="tl-track-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Overlays
+          </div>
+          <div class="tl-track" id="overlayTrack"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT: PROPERTIES PANEL -->
+    <aside class="vprops" id="vProps">
+      <div class="vp-empty" id="vpEmpty">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <p>Select a clip or overlay to edit its properties</p>
+      </div>
+
+      <!-- CLIP PROPS -->
+      <div class="vp-section hidden" id="clipProps">
+        <div class="vp-title">Clip Properties</div>
+
+        <div class="opt-lbl">Trim Start</div>
+        <div class="sl-row">
+          <input type="range" class="slider" id="trimStart" min="0" max="100" value="0" step="0.1" />
+          <span class="sl-out" id="trimStartVal">0.0s</span>
+        </div>
+
+        <div class="opt-lbl mt">Trim End</div>
+        <div class="sl-row">
+          <input type="range" class="slider" id="trimEnd" min="0" max="100" value="100" step="0.1" />
+          <span class="sl-out" id="trimEndVal">0.0s</span>
+        </div>
+
+        <div class="opt-lbl mt">Speed</div>
+        <div class="sl-row">
+          <input type="range" class="slider" id="clipSpeed" min="25" max="400" value="100" />
+          <span class="sl-out" id="clipSpeedVal">1×</span>
+        </div>
+
+        <div class="opt-lbl mt">Volume</div>
+        <div class="sl-row">
+          <input type="range" class="slider" id="clipVolume" min="0" max="200" value="100" />
+          <span class="sl-out" id="clipVolumeVal">100%</span>
+        </div>
+
+        <div class="opt-lbl mt">Transition In</div>
+        <select class="opt-sel" id="transitionIn">
+          <option value="none">None (hard cut)</option>
+          <option value="fade">Fade In</option>
+          <option value="zoom">Zoom In</option>
+        </select>
+
+        <div class="opt-lbl mt">Transition Out</div>
+        <select class="opt-sel" id="transitionOut">
+          <option value="none">None (hard cut)</option>
+          <option value="fade">Fade Out</option>
+          <option value="zoom">Zoom Out</option>
+        </select>
+
+        <div class="opt-lbl mt">Filter</div>
+        <select class="opt-sel" id="clipFilter">
+          <option value="none">None</option>
+          <option value="grayscale(1)">Black & White</option>
+          <option value="sepia(0.8)">Sepia</option>
+          <option value="contrast(1.3) saturate(1.4)">Vivid</option>
+          <option value="brightness(1.1) contrast(0.9)">Soft</option>
+          <option value="contrast(1.5) brightness(0.85)">Cinematic</option>
+          <option value="saturate(0.3)">Desaturate</option>
+          <option value="invert(1)">Invert</option>
+        </select>
+
+        <button class="btn-ghost full sm mt" id="deleteClipPropBtn">🗑 Remove Clip</button>
+      </div>
+
+      <!-- TEXT OVERLAY PROPS -->
+      <div class="vp-section hidden" id="textOverlayProps">
+        <div class="vp-title">Text Overlay</div>
+
+        <div class="opt-lbl">Text</div>
+        <textarea class="opt-textarea" id="overlayText" rows="3" placeholder="Enter text..."></textarea>
+
+        <div class="opt-lbl mt">Font Size</div>
+        <div class="sl-row"><input type="range" class="slider" id="olFontSize" min="10" max="120" value="32" /><span class="sl-out" id="olFontSizeVal">32px</span></div>
+
+        <div class="opt-lbl mt">Color</div>
+        <div class="mini-colors" id="olColorGrid"></div>
+        <input type="color" id="olCustomColor" value="#ffffff" style="margin-top:6px;width:100%;height:28px;border:none;border-radius:4px;cursor:pointer;" />
+
+        <div class="opt-lbl mt">Background</div>
+        <div class="btn-row">
+          <button class="tog active" id="olBgNone">None</button>
+          <button class="tog" id="olBgDark">Dark</button>
+          <button class="tog" id="olBgColor">Color</button>
+        </div>
+
+        <div class="opt-lbl mt">Bold / Italic</div>
+        <div class="btn-row">
+          <button class="tog" id="olBold"><b>B</b></button>
+          <button class="tog" id="olItalic"><i>I</i></button>
+        </div>
+
+        <div class="opt-lbl mt">Start Time</div>
+        <div class="sl-row"><input type="range" class="slider" id="olStartTime" min="0" max="100" value="0" step="0.1" /><span class="sl-out" id="olStartVal">0.0s</span></div>
+
+        <div class="opt-lbl mt">Duration</div>
+        <div class="sl-row"><input type="range" class="slider" id="olDuration" min="0.5" max="30" value="3" step="0.5" /><span class="sl-out" id="olDurVal">3.0s</span></div>
+
+        <div class="opt-lbl mt">Position</div>
+        <div class="pos-grid">
+          <button class="pos-btn" data-pos="top-left">↖</button>
+          <button class="pos-btn" data-pos="top-center">↑</button>
+          <button class="pos-btn" data-pos="top-right">↗</button>
+          <button class="pos-btn active" data-pos="center">●</button>
+          <button class="pos-btn" data-pos="bottom-left">↙</button>
+          <button class="pos-btn" data-pos="bottom-center">↓</button>
+          <button class="pos-btn" data-pos="bottom-right">↘</button>
+        </div>
+
+        <button class="btn-ghost full sm mt" id="deleteOverlayBtn">🗑 Remove Overlay</button>
+      </div>
+
+      <!-- AUDIO PROPS -->
+      <div class="vp-section hidden" id="audioProps">
+        <div class="vp-title">Audio Track</div>
+
+        <div class="opt-lbl">Volume</div>
+        <div class="sl-row"><input type="range" class="slider" id="audioVolume" min="0" max="200" value="100" /><span class="sl-out" id="audioVolVal">100%</span></div>
+
+        <div class="opt-lbl mt">Start Offset</div>
+        <div class="sl-row"><input type="range" class="slider" id="audioOffset" min="0" max="100" value="0" step="0.1" /><span class="sl-out" id="audioOffsetVal">0.0s</span></div>
+
+        <div class="opt-lbl mt">Fade In</div>
+        <div class="sl-row"><input type="range" class="slider" id="audioFadeIn" min="0" max="5" value="0" step="0.1" /><span class="sl-out" id="audioFadeInVal">0.0s</span></div>
+
+        <div class="opt-lbl mt">Fade Out</div>
+        <div class="sl-row"><input type="range" class="slider" id="audioFadeOut" min="0" max="5" value="0" step="0.1" /><span class="sl-out" id="audioFadeOutVal">0.0s</span></div>
+
+        <label class="check-row mt"><input type="checkbox" id="audioLoop" /> Loop audio</label>
+
+        <button class="btn-ghost full sm mt" id="deleteAudioBtn">🗑 Remove Audio</button>
+      </div>
+
+      <!-- EXPORT PANEL -->
+      <div class="vp-section" id="exportProps">
+        <div class="vp-title">Export Settings</div>
+
+        <div class="opt-lbl">Resolution</div>
+        <select class="opt-sel" id="exportRes">
+          <option value="source">Source (original)</option>
+          <option value="1080">1080p</option>
+          <option value="720" selected>720p</option>
+          <option value="480">480p</option>
+          <option value="360">360p</option>
+        </select>
+
+        <div class="opt-lbl mt">Format</div>
+        <select class="opt-sel" id="exportFormat">
+          <option value="mp4">MP4 (H.264)</option>
+          <option value="webm">WebM (VP9)</option>
+          <option value="gif">Animated GIF</option>
+        </select>
+
+        <div class="opt-lbl mt">Quality</div>
+        <div class="btn-row">
+          <button class="tog" id="qualDraft">Draft</button>
+          <button class="tog active" id="qualMed">Standard</button>
+          <button class="tog" id="qualHigh">High</button>
+        </div>
+
+        <div class="export-info" id="exportInfo">
+          Ready to export
+        </div>
+
+        <div class="export-progress hidden" id="exportProgress">
+          <div class="exp-bar-wrap"><div class="exp-bar" id="expBar"></div></div>
+          <span class="exp-pct" id="expPct">0%</span>
+        </div>
+
+        <button class="btn-primary solo full mt" id="startExportBtn">⬇ Export Now</button>
+      </div>
+
+    </aside>
+  </div>
+
+</div>
+
+<!-- ADD TEXT MODAL -->
+<div class="modal hidden" id="addTextModal">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-head"><h3>Add Text Overlay</h3><button class="modal-x" id="closeTextModal">✕</button></div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+      <textarea class="opt-textarea" id="newOverlayText" rows="3" placeholder="Type your text here..."></textarea>
+      <div class="opt-lbl">Color</div>
+      <div class="mini-colors" id="newOlColors"></div>
+      <div class="opt-lbl">Font Size</div>
+      <div class="sl-row"><input type="range" class="slider" id="newOlSize" min="10" max="120" value="32" /><span class="sl-out" id="newOlSizeVal">32px</span></div>
+      <div class="opt-lbl">Position</div>
+      <div class="pos-grid" id="newPosGrid">
+        <button class="pos-btn" data-pos="top-left">↖</button>
+        <button class="pos-btn" data-pos="top-center">↑</button>
+        <button class="pos-btn" data-pos="top-right">↗</button>
+        <button class="pos-btn active" data-pos="center">●</button>
+        <button class="pos-btn" data-pos="bottom-left">↙</button>
+        <button class="pos-btn active" data-pos="bottom-center">↓</button>
+        <button class="pos-btn" data-pos="bottom-right">↘</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="cancelTextModal">Cancel</button>
+      <button class="btn-primary" id="confirmTextModal">Add Text</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD EMOJI MODAL -->
+<div class="modal hidden" id="addEmojiModal">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-head"><h3>Add Emoji</h3><button class="modal-x" id="closeEmojiModal">✕</button></div>
+    <div style="padding:14px">
+      <div class="etabs" id="vEmojiTabs">
+        <button class="etab active" data-cat="reactions">😄</button>
+        <button class="etab" data-cat="symbols">🔴</button>
+        <button class="etab" data-cat="arrows">➡️</button>
+        <button class="etab" data-cat="objects">💡</button>
+        <button class="etab" data-cat="faces">😎</button>
+      </div>
+      <div class="emoji-grid large" id="vEmojiGrid"></div>
+      <div class="opt-lbl" style="margin-top:10px">Size</div>
+      <div class="sl-row"><input type="range" class="slider" id="vEmojiSize" min="20" max="120" value="48" /><span class="sl-out" id="vEmojiSizeVal">48px</span></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="cancelEmojiModal">Cancel</button>
+      <button class="btn-primary" id="confirmEmojiModal">Add Emoji</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT PROGRESS MODAL -->
+<div class="modal hidden" id="exportModal">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-head"><h3>Exporting Video</h3></div>
+    <div style="padding:24px;text-align:center;display:flex;flex-direction:column;gap:16px">
+      <p class="exp-status" id="expStatus">Preparing export...</p>
+      <div class="exp-bar-wrap large"><div class="exp-bar" id="expBarModal"></div></div>
+      <span class="exp-pct large" id="expPctModal">0%</span>
+      <p class="opt-hint">This may take a minute for long videos. Do not close this tab.</p>
+      <button class="btn-ghost" id="cancelExportBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="vToast"></div>
+<button class="sc-hint" id="vShortcutsBtn" title="Keyboard shortcuts">⌨</button>
+
+<!-- SHORTCUTS MODAL -->
+<div class="modal hidden" id="vShortcutsModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Video Editor Shortcuts</h3><button class="modal-x" id="closeVShortcuts">✕</button></div>
+    <div class="sc-grid">
+      <div class="sc-row"><kbd>Space</kbd><span>Play / Pause</span></div>
+      <div class="sc-row"><kbd>S</kbd><span>Split clip at playhead</span></div>
+      <div class="sc-row"><kbd>Del</kbd><span>Delete selected clip</span></div>
+      <div class="sc-row"><kbd>J</kbd><span>Skip back 5s</span></div>
+      <div class="sc-row"><kbd>L</kbd><span>Skip forward 5s</span></div>
+      <div class="sc-row"><kbd>←</kbd><span>Previous frame</span></div>
+      <div class="sc-row"><kbd>→</kbd><span>Next frame</span></div>
+      <div class="sc-row"><kbd>Ctrl+Z</kbd><span>Undo</span></div>
+      <div class="sc-row"><kbd>Ctrl+Y</kbd><span>Redo</span></div>
+      <div class="sc-row"><kbd>M</kbd><span>Mute / unmute</span></div>
+      <div class="sc-row"><kbd>E</kbd><span>Export</span></div>
+      <div class="sc-row"><kbd>0</kbd><span>Go to start</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="video.js"></script>
+</body>
+</html>
