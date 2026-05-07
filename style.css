@@ -420,3 +420,15 @@ button { cursor: pointer; }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+/* ── VIDEO EDITOR LINK ── */
+.video-editor-link {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-muted); text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 16px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  transition: all .15s;
+}
+.video-editor-link:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
