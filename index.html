@@ -1,1 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editr — Your Personal Media Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
 
+  <!-- LANDING / UPLOAD SCREEN -->
+  <div id="landing" class="screen active">
+    <div class="landing-bg">
+      <div class="grid-lines"></div>
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+    </div>
+    <div class="landing-content">
+      <div class="logo-wrap">
+        <span class="logo-icon">⬡</span>
+        <h1 class="logo-text">editr</h1>
+      </div>
+      <p class="tagline">Your free, private, unlimited<br/>screenshot & video editor.</p>
+      <p class="sub-tagline">Nothing leaves your device. Ever.</p>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-inner">
+          <div class="upload-icon">↑</div>
+          <p class="upload-label">Drop an image or video here</p>
+          <p class="upload-sub">or click to browse</p>
+          <input type="file" id="fileInput" accept="image/*,video/*" hidden />
+        </div>
+        <div class="upload-border"></div>
+      </div>
+
+      <div class="supported-formats">
+        <span>PNG</span><span>JPG</span><span>WEBP</span><span>GIF</span><span>MP4</span><span>WEBM</span><span>MOV</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDITOR SCREEN -->
+  <div id="editor" class="screen">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-icon" id="backBtn" title="Back">←</button>
+        <span class="logo-text small">editr</span>
+        <span class="file-name" id="fileName">untitled</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost" id="undoBtn" title="Undo (Ctrl+Z)">↩ Undo</button>
+        <button class="btn btn-ghost" id="redoBtn" title="Redo (Ctrl+Y)">↪ Redo</button>
+        <button class="btn btn-primary" id="downloadBtn">⬇ Download</button>
+      </div>
+    </header>
+
+    <!-- MAIN EDITOR LAYOUT -->
+    <div class="editor-layout">
+
+      <!-- LEFT TOOLBAR -->
+      <aside class="toolbar" id="toolbar">
+        <div class="tool-section">
+          <p class="tool-label">Select</p>
+          <button class="tool-btn active" data-tool="select" title="Select & Move">
+            <span class="tool-icon">↖</span>
+            <span>Select</span>
+          </button>
+        </div>
+
+        <div class="tool-section">
+          <p class="tool-label">Draw</p>
+          <button class="tool-btn" data-tool="pen" title="Freehand Pen">
+            <span class="tool-icon">✏</span>
+            <span>Pen</span>
+          </button>
+          <button class="tool-btn" data-tool="highlighter" title="Highlighter">
+            <span class="tool-icon">▌</span>
+            <span>Highlight</span>
+          </button>
+          <button class="tool-btn" data-tool="eraser" title="Eraser">
+            <span class="tool-icon">◻</span>
+            <span>Eraser</span>
+          </button>
+        </div>
+
+        <div class="tool-section">
+          <p class="tool-label">Shapes</p>
+          <button class="tool-btn" data-tool="arrow" title="Arrow">
+            <span class="tool-icon">→</span>
+            <span>Arrow</span>
+          </button>
+          <button class="tool-btn" data-tool="line" title="Line">
+            <span class="tool-icon">╱</span>
+            <span>Line</span>
+          </button>
+          <button class="tool-btn" data-tool="rect" title="Rectangle">
+            <span class="tool-icon">▭</span>
+            <span>Rect</span>
+          </button>
+          <button class="tool-btn" data-tool="circle" title="Circle">
+            <span class="tool-icon">○</span>
+            <span>Circle</span>
+          </button>
+          <button class="tool-btn" data-tool="callout" title="Callout / Speech Bubble">
+            <span class="tool-icon">💬</span>
+            <span>Callout</span>
+          </button>
+        </div>
+
+        <div class="tool-section">
+          <p class="tool-label">Annotate</p>
+          <button class="tool-btn" data-tool="text" title="Text">
+            <span class="tool-icon">T</span>
+            <span>Text</span>
+          </button>
+          <button class="tool-btn" data-tool="blur" title="Blur / Redact">
+            <span class="tool-icon">⬡</span>
+            <span>Blur</span>
+          </button>
+          <button class="tool-btn" data-tool="counter" title="Step Counter">
+            <span class="tool-icon">①</span>
+            <span>Step #</span>
+          </button>
+          <button class="tool-btn" data-tool="emoji" title="Emoji Stamp">
+            <span class="tool-icon">★</span>
+            <span>Emoji</span>
+          </button>
+        </div>
+
+        <div class="tool-section">
+          <p class="tool-label">Image</p>
+          <button class="tool-btn" data-tool="crop" title="Crop">
+            <span class="tool-icon">⊡</span>
+            <span>Crop</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- CANVAS AREA -->
+      <main class="canvas-area" id="canvasArea">
+        <div class="canvas-container" id="canvasContainer">
+          <canvas id="mainCanvas"></canvas>
+          <canvas id="overlayCanvas"></canvas>
+          <!-- video element for video editing -->
+          <video id="videoEl" style="display:none" crossorigin="anonymous"></video>
+        </div>
+
+        <!-- VIDEO CONTROLS (shown only for video) -->
+        <div class="video-controls" id="videoControls" style="display:none">
+          <button class="btn-icon" id="playPauseBtn">▶</button>
+          <div class="video-timeline">
+            <div class="timeline-bar" id="timelineBar">
+              <div class="timeline-fill" id="timelineFill"></div>
+              <div class="trim-left" id="trimLeft"></div>
+              <div class="trim-right" id="trimRight"></div>
+              <div class="playhead" id="playhead"></div>
+            </div>
+          </div>
+          <span class="video-time" id="videoTime">0:00 / 0:00</span>
+        </div>
+      </main>
+
+      <!-- RIGHT PANEL: OPTIONS -->
+      <aside class="options-panel" id="optionsPanel">
+
+        <!-- COLOR -->
+        <div class="option-group" id="colorGroup">
+          <p class="option-label">Color</p>
+          <div class="color-grid">
+            <button class="color-swatch active" data-color="#FF3B57" style="background:#FF3B57"></button>
+            <button class="color-swatch" data-color="#FF9500" style="background:#FF9500"></button>
+            <button class="color-swatch" data-color="#FFD60A" style="background:#FFD60A"></button>
+            <button class="color-swatch" data-color="#34C759" style="background:#34C759"></button>
+            <button class="color-swatch" data-color="#00C7FF" style="background:#00C7FF"></button>
+            <button class="color-swatch" data-color="#0A84FF" style="background:#0A84FF"></button>
+            <button class="color-swatch" data-color="#BF5AF2" style="background:#BF5AF2"></button>
+            <button class="color-swatch" data-color="#ffffff" style="background:#ffffff;border:1px solid #444"></button>
+            <button class="color-swatch" data-color="#000000" style="background:#000000"></button>
+          </div>
+          <div class="custom-color-row">
+            <label>Custom</label>
+            <input type="color" id="customColor" value="#FF3B57" />
+          </div>
+        </div>
+
+        <!-- STROKE SIZE -->
+        <div class="option-group" id="sizeGroup">
+          <p class="option-label">Size</p>
+          <input type="range" id="strokeSize" min="1" max="40" value="3" class="slider" />
+          <span class="slider-val" id="strokeSizeVal">3px</span>
+        </div>
+
+        <!-- OPACITY -->
+        <div class="option-group" id="opacityGroup">
+          <p class="option-label">Opacity</p>
+          <input type="range" id="opacitySlider" min="10" max="100" value="100" class="slider" />
+          <span class="slider-val" id="opacityVal">100%</span>
+        </div>
+
+        <!-- TEXT OPTIONS -->
+        <div class="option-group hidden" id="textGroup">
+          <p class="option-label">Font Size</p>
+          <input type="range" id="fontSize" min="10" max="120" value="24" class="slider" />
+          <span class="slider-val" id="fontSizeVal">24px</span>
+          <p class="option-label" style="margin-top:10px">Style</p>
+          <div class="btn-row">
+            <button class="btn-toggle" id="boldBtn"><b>B</b></button>
+            <button class="btn-toggle" id="italicBtn"><i>I</i></button>
+            <button class="btn-toggle" id="bgTextBtn">BG</button>
+          </div>
+        </div>
+
+        <!-- BLUR OPTIONS -->
+        <div class="option-group hidden" id="blurGroup">
+          <p class="option-label">Blur Intensity</p>
+          <input type="range" id="blurIntensity" min="2" max="30" value="10" class="slider" />
+          <span class="slider-val" id="blurVal">10</span>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn btn-ghost small" id="pixelateBtn">Pixelate</button>
+            <button class="btn btn-ghost small" id="gaussianBtn">Gaussian</button>
+          </div>
+        </div>
+
+        <!-- EMOJI PICKER -->
+        <div class="option-group hidden" id="emojiGroup">
+          <p class="option-label">Pick Emoji</p>
+          <div class="emoji-grid">
+            <span class="emoji-btn" data-emoji="👍">👍</span>
+            <span class="emoji-btn" data-emoji="❤️">❤️</span>
+            <span class="emoji-btn" data-emoji="⭐">⭐</span>
+            <span class="emoji-btn" data-emoji="🔥">🔥</span>
+            <span class="emoji-btn" data-emoji="✅">✅</span>
+            <span class="emoji-btn" data-emoji="❌">❌</span>
+            <span class="emoji-btn" data-emoji="⚠️">⚠️</span>
+            <span class="emoji-btn" data-emoji="💡">💡</span>
+            <span class="emoji-btn" data-emoji="🎯">🎯</span>
+            <span class="emoji-btn" data-emoji="🚀">🚀</span>
+            <span class="emoji-btn" data-emoji="👀">👀</span>
+            <span class="emoji-btn" data-emoji="💬">💬</span>
+          </div>
+        </div>
+
+        <!-- DOWNLOAD OPTIONS -->
+        <div class="option-group" id="downloadGroup">
+          <p class="option-label">Export As</p>
+          <div class="btn-col">
+            <button class="btn btn-ghost full" data-format="png">PNG (lossless)</button>
+            <button class="btn btn-ghost full" data-format="jpg">JPG (smaller)</button>
+            <button class="btn btn-ghost full" data-format="webp">WebP (best)</button>
+          </div>
+        </div>
+
+        <!-- VIDEO EXPORT (hidden for images) -->
+        <div class="option-group hidden" id="videoExportGroup">
+          <p class="option-label">Video Export</p>
+          <div class="btn-col">
+            <button class="btn btn-ghost full" id="exportGifBtn">Export as GIF</button>
+            <button class="btn btn-ghost full" id="exportMp4Btn">Export as MP4</button>
+          </div>
+          <p class="option-hint">* Video export uses your browser's built-in encoder</p>
+        </div>
+
+        <!-- IMAGE ADJUSTMENTS -->
+        <div class="option-group" id="adjustGroup">
+          <p class="option-label">Adjustments</p>
+          <div class="adjust-row">
+            <span>Brightness</span>
+            <input type="range" class="slider sm" id="brightness" min="-100" max="100" value="0" />
+          </div>
+          <div class="adjust-row">
+            <span>Contrast</span>
+            <input type="range" class="slider sm" id="contrast" min="-100" max="100" value="0" />
+          </div>
+          <div class="adjust-row">
+            <span>Saturation</span>
+            <input type="range" class="slider sm" id="saturation" min="-100" max="100" value="0" />
+          </div>
+          <button class="btn btn-ghost full" id="resetAdjustBtn" style="margin-top:8px">Reset</button>
+        </div>
+
+        <!-- TRANSFORM -->
+        <div class="option-group" id="transformGroup">
+          <p class="option-label">Transform</p>
+          <div class="btn-row wrap">
+            <button class="btn btn-ghost small" id="rotateLeftBtn">↺ 90°</button>
+            <button class="btn btn-ghost small" id="rotateRightBtn">↻ 90°</button>
+            <button class="btn btn-ghost small" id="flipHBtn">↔ Flip H</button>
+            <button class="btn btn-ghost small" id="flipVBtn">↕ Flip V</button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+
+    <!-- FLOATING SELECTION TOOLBAR -->
+    <div class="float-toolbar hidden" id="floatToolbar">
+      <button id="deleteSelected" title="Delete">🗑 Delete</button>
+      <button id="bringFront" title="Bring Forward">↑ Forward</button>
+      <button id="sendBack" title="Send Back">↓ Back</button>
+      <button id="duplicateSelected" title="Duplicate">⧉ Dupe</button>
+    </div>
+
+  </div>
+
+  <!-- CROP MODAL -->
+  <div class="modal hidden" id="cropModal">
+    <div class="modal-box">
+      <h2>Crop Image</h2>
+      <canvas id="cropCanvas"></canvas>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelCrop">Cancel</button>
+        <button class="btn btn-primary" id="applyCrop">Apply Crop</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="js/editor.js"></script>
+</body>
+</html>
