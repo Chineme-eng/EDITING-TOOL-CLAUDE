@@ -185,3 +185,28 @@ button{cursor:pointer;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:3px;}
+
+/* ── v4 ADDITIONS ── */
+/* Mode switch button */
+.mode-switch-btn,.mode-switch{display:flex;align-items:center;gap:6px;color:var(--text-muted);text-decoration:none;font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);transition:all .15s;}
+.mode-switch-btn:hover,.mode-switch:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow);}
+
+/* Info bar */
+.info-bar{position:absolute;top:50px;right:12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);pointer-events:none;z-index:5;}
+.canvas-info-bar{position:fixed;bottom:0;left:0;right:0;height:20px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);z-index:5;}
+
+/* Context menu */
+.ctx-menu{position:fixed;background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);z-index:500;min-width:160px;}
+.ctx-menu.hidden{display:none;}
+.ctx-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);padding:9px 14px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .1s;}
+.ctx-item:hover{background:var(--bg3);}
+.ctx-item.danger:hover{background:rgba(255,59,87,.1);color:var(--accent);}
+.ctx-sep{height:1px;background:var(--border);margin:3px 0;}
+
+/* Crop shape buttons */
+.crop-shape-btn{padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;}
+.crop-shape-btn:hover{border-color:var(--border-hi);color:var(--text);}
+.crop-shape-btn.active{background:var(--accent-glow);border-color:rgba(255,59,87,.4);color:var(--accent);}
+
+/* Blur hint small */
+.blur-hint{font-size:11px;color:var(--text-muted);background:var(--bg3);border-radius:var(--radius-sm);padding:7px 10px;line-height:1.4;}
