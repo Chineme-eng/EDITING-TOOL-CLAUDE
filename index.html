@@ -8,28 +8,36 @@
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+<!-- LANDING -->
 <div id="landing" class="screen active">
   <div class="landing-bg"><div class="grid-lines"></div><div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div></div>
   <div class="landing-content">
     <div class="brand"><div class="brand-icon"><svg width="38" height="38" viewBox="0 0 36 36"><polygon points="18,2 34,10 34,26 18,34 2,26 2,10" fill="none" stroke="var(--accent)" stroke-width="2.5"/><polygon points="18,8 28,13 28,23 18,28 8,23 8,13" fill="var(--accent)" opacity="0.2"/><circle cx="18" cy="18" r="4" fill="var(--accent)"/></svg></div><h1 class="brand-name">editr</h1></div>
     <p class="landing-tagline">Free. Private. Unlimited.</p>
-    <p class="landing-sub">Your screenshots &amp; videos never leave your device.</p>
+    <p class="landing-sub">Nothing ever leaves your device.</p>
     <div class="upload-zone" id="uploadZone">
       <input type="file" id="fileInput" accept="image/*,video/*" hidden/>
       <div class="upload-icon-wrap"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><path d="M20 8v18M13 16l7-8 7 8" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 30v3a2 2 0 002 2h24a2 2 0 002-2v-3" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"/></svg></div>
-      <p class="upload-main">Drop image or video here</p>
+      <p class="upload-main">Drop image here</p>
       <p class="upload-hint">or <span class="upload-link">click to browse</span></p>
-      <div class="upload-formats"><span>PNG</span><span>JPG</span><span>WEBP</span><span>GIF</span><span>MP4</span><span>WEBM</span><span>MOV</span></div>
+      <div class="upload-formats"><span>PNG</span><span>JPG</span><span>WEBP</span><span>GIF</span><span>BMP</span></div>
     </div>
     <p class="paste-hint">or press <kbd>Ctrl+V</kbd> to paste a screenshot</p>
-    <a href="video.html" class="video-editor-link">🎬 Switch to Video Editor →</a>
+    <a href="video.html" class="mode-switch-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M17 10l-5 3 5 3V10z" fill="currentColor" stroke="none"/></svg>
+      Switch to Video Editor
+    </a>
   </div>
 </div>
+
+<!-- EDITOR -->
 <div id="editor" class="screen">
   <header class="topbar">
     <div class="topbar-left">
       <div class="brand mini"><svg width="20" height="20" viewBox="0 0 36 36"><polygon points="18,2 34,10 34,26 18,34 2,26 2,10" fill="none" stroke="var(--accent)" stroke-width="2.5"/><circle cx="18" cy="18" r="4" fill="var(--accent)"/></svg><span class="brand-name">editr</span></div>
-      <div class="dvdr"></div><span class="file-badge" id="fileName">untitled</span>
+      <div class="dvdr"></div>
+      <span class="file-badge" id="fileName">untitled</span>
+      <span class="file-badge" id="historyIndicator" style="color:var(--accent);border-color:var(--accent)"></span>
       <button class="btn-topbar" id="addMediaBtn">+ New / Change</button>
       <input type="file" id="addFileInput" accept="image/*,video/*" hidden/>
     </div>
@@ -39,6 +47,7 @@
       <button class="tbar-act" id="clearAllBtn">⊘ Clear</button>
     </div>
     <div class="topbar-right">
+      <a href="video.html" class="btn-topbar mode-switch">🎬 Video Editor</a>
       <button class="theme-toggle" id="themeToggle"><span class="ti dark-i">🌙</span><span class="ti light-i">☀️</span></button>
       <button class="btn-topbar" id="copyBtn">⎘ Copy</button>
       <div class="dl-wrap">
@@ -55,7 +64,9 @@
       <button class="tbar-act" id="shortcutsBtn">⌨</button>
     </div>
   </header>
+
   <div class="editor-body" id="editorBody">
+    <!-- LEFT TOOLBAR -->
     <aside class="toolbar" id="toolbar">
       <div class="tg"><div class="tg-label">Select</div>
         <button class="tool-btn active" data-tool="select"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l7 18 3-7 7-3z"/></svg><span>Select</span></button>
@@ -89,14 +100,18 @@
         <input type="file" id="importLayerInput" accept="image/*,image/gif" hidden/>
       </div>
     </aside>
+
     <div class="resize-handle-v" id="resizeLeft"></div>
+
+    <!-- CANVAS -->
     <main class="canvas-area" id="canvasArea">
       <div class="zoom-bar">
         <button class="zoom-btn" id="zoomOutBtn">−</button>
-        <span class="zoom-val" id="zoomVal">100%</span>
+        <span class="zoom-val" id="zoomVal" title="Double-click to type zoom %">100%</span>
         <button class="zoom-btn" id="zoomInBtn">+</button>
-        <button class="zoom-btn" id="zoomFitBtn">⊡</button>
+        <button class="zoom-btn" id="zoomFitBtn" title="Fit to screen">⊡</button>
       </div>
+      <div class="info-bar" id="infoBar"></div>
       <div class="drop-overlay hidden" id="dropOverlay"><div class="drop-overlay-inner"><div style="font-size:48px">📥</div><p>Drop to add as layer</p></div></div>
       <div class="canvas-viewport" id="canvasViewport">
         <div class="canvas-container" id="canvasContainer">
@@ -105,7 +120,10 @@
         </div>
       </div>
     </main>
+
     <div class="resize-handle-v" id="resizeRight"></div>
+
+    <!-- RIGHT PANEL -->
     <aside class="options-panel" id="optionsPanel">
       <div class="opt-sec">
         <div class="opt-lbl">Color</div>
@@ -133,24 +151,20 @@
         <div class="opt-lbl mt">Opacity</div>
         <div class="sl-row"><input type="range" class="slider" id="opacitySlider" min="5" max="100" value="100"/><span class="sl-out" id="opacityVal">100%</span></div>
       </div>
+      <!-- TEXT -->
       <div class="opt-sec hidden" id="textSec">
         <div class="opt-lbl">Font Size</div>
         <div class="sl-row"><input type="range" class="slider" id="fontSize" min="8" max="144" value="24"/><span class="sl-out" id="fontSizeVal">24px</span></div>
         <div class="opt-lbl mt">Font</div>
         <select class="opt-sel" id="fontFamily"><option value="DM Sans">DM Sans</option><option value="JetBrains Mono">Monospace</option><option value="Georgia">Georgia</option><option value="Impact">Impact</option><option value="Arial Rounded MT Bold">Rounded</option></select>
-        <div class="btn-row mt">
-          <button class="tog" id="boldBtn"><b>B</b></button>
-          <button class="tog italic-tog" id="italicBtn"><i>I</i></button>
-          <button class="tog" id="bgTextBtn">BG</button>
-          <button class="tog" id="outlineTextBtn">⊡</button>
-          <button class="tog" id="allCapsBtn">AA</button>
-        </div>
+        <div class="btn-row mt"><button class="tog" id="boldBtn"><b>B</b></button><button class="tog italic-tog" id="italicBtn"><i>I</i></button><button class="tog" id="bgTextBtn">BG</button><button class="tog" id="outlineTextBtn">⊡</button><button class="tog" id="allCapsBtn">AA</button></div>
         <div class="opt-lbl mt">Align</div>
         <div class="btn-row"><button class="tog active" id="alignLeft">L</button><button class="tog" id="alignCenter">C</button><button class="tog" id="alignRight">R</button></div>
         <div class="opt-lbl mt">Letter Spacing</div>
         <div class="sl-row"><input type="range" class="slider" id="letterSpacing" min="-5" max="20" value="0"/><span class="sl-out" id="letterSpacingVal">0</span></div>
         <label class="check-row mt"><input type="checkbox" id="textShadowBtn"/> Text Shadow</label>
       </div>
+      <!-- ARROW -->
       <div class="opt-sec hidden" id="arrowSec">
         <div class="opt-lbl">Arrow Style</div>
         <div class="arrow-styles">
@@ -161,6 +175,7 @@
           <button class="arr-btn" data-arrow="curved">↪ Curved</button>
         </div>
       </div>
+      <!-- SHAPE -->
       <div class="opt-sec hidden" id="shapeSec">
         <div class="opt-lbl">Fill</div>
         <div class="btn-row"><button class="tog active" id="fillNone">Outline</button><button class="tog" id="fillSolid">Solid</button><button class="tog" id="fillSemi">50%</button></div>
@@ -171,13 +186,18 @@
         <div class="opt-lbl mt">Fill Color</div>
         <div class="cust-color-row"><span>Fill</span><input type="color" id="fillColor" value="#FF3B57"/><button class="tog sm" id="fillTransparentBtn" style="white-space:nowrap;flex-shrink:0">No Fill</button></div>
       </div>
+      <!-- BLUR -->
       <div class="opt-sec hidden" id="blurSec">
         <div class="opt-lbl">Blur Type</div>
         <div class="btn-row"><button class="tog active" id="blurGaussian">Gaussian</button><button class="tog" id="blurPixelate">Pixelate</button></div>
         <div class="opt-lbl mt">Intensity</div>
         <div class="sl-row"><input type="range" class="slider" id="blurIntensity" min="2" max="40" value="12"/><span class="sl-out" id="blurVal">12</span></div>
-        <div class="blur-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Drag to select blur area</div>
+        <label class="check-row mt" style="margin-top:10px">
+          <input type="checkbox" id="blurOutlineToggle" checked/> Show outline border
+        </label>
+        <div class="blur-hint mt">Drag to select blur area. Dimensions shown while dragging.</div>
       </div>
+      <!-- EMOJI -->
       <div class="opt-sec hidden" id="emojiSec">
         <div class="opt-lbl">Category</div>
         <div class="etabs"><button class="etab active" data-cat="reactions">😄</button><button class="etab" data-cat="symbols">🔴</button><button class="etab" data-cat="arrows">➡️</button><button class="etab" data-cat="objects">💡</button><button class="etab" data-cat="faces">😎</button></div>
@@ -185,11 +205,13 @@
         <div class="opt-lbl mt">Size</div>
         <div class="sl-row"><input type="range" class="slider" id="emojiSize" min="1" max="12" value="4"/><span class="sl-out" id="emojiSizeVal">4</span></div>
       </div>
+      <!-- COUNTER -->
       <div class="opt-sec hidden" id="counterSec">
         <div class="opt-lbl">Next Label</div>
         <div class="counter-display" id="counterDisplay">1</div>
         <button class="btn-ghost full sm mt" id="resetCounterBtn">↺ Reset</button>
       </div>
+      <!-- WATERMARK -->
       <div class="opt-sec hidden" id="watermarkSec">
         <div class="opt-lbl">Watermark</div>
         <button class="btn-ghost full sm" id="uploadWatermarkBtn">📁 Upload Image</button>
@@ -199,14 +221,16 @@
         <div class="sl-row"><input type="range" class="slider" id="wmOpacity" min="5" max="100" value="40"/><span class="sl-out" id="wmOpacityVal">40%</span></div>
         <div class="opt-lbl mt">Scale</div>
         <div class="sl-row"><input type="range" class="slider" id="wmScale" min="5" max="100" value="25"/><span class="sl-out" id="wmScaleVal">25%</span></div>
-        <div class="opt-lbl mt">Position</div>
+        <div class="opt-lbl mt">Preset Position</div>
         <div class="pos-grid-3">
           <button class="pos-btn" data-pos="tl">↖</button><button class="pos-btn" data-pos="tc">↑</button><button class="pos-btn" data-pos="tr">↗</button>
           <button class="pos-btn" data-pos="c">●</button><button class="pos-btn" data-pos="bl">↙</button><button class="pos-btn" data-pos="bc">↓</button>
           <button class="pos-btn active" data-pos="br">↘</button>
         </div>
-        <button class="btn-primary full mt" id="applyWatermarkBtn" style="border-radius:6px;padding:8px">Apply Watermark</button>
+        <button class="btn-primary full mt" id="applyWatermarkBtn" style="border-radius:6px;padding:8px">Apply at Position</button>
+        <p class="opt-hint mt">Or click canvas to place. Drag to reposition after placing.</p>
       </div>
+      <!-- FILTERS -->
       <div class="opt-sec">
         <div class="opt-lbl">Filters</div>
         <div class="filter-grid-2">
@@ -220,8 +244,11 @@
           <button class="filt2-btn" data-filter="invert(1)">Invert</button>
           <button class="filt2-btn" data-filter="hue-rotate(90deg)">Hue 90</button>
           <button class="filt2-btn" data-filter="hue-rotate(180deg)">Hue 180</button>
+          <button class="filt2-btn" data-filter="brightness(1.2) saturate(1.6)">Warm</button>
+          <button class="filt2-btn" data-filter="hue-rotate(200deg) saturate(1.3)">Cool</button>
         </div>
       </div>
+      <!-- ADJUSTMENTS -->
       <div class="opt-sec">
         <div class="opt-lbl">Adjustments</div>
         <div class="adj-row"><span>Brightness</span><input type="range" class="slider sm" id="brightness" min="-100" max="100" value="0"/></div>
@@ -229,12 +256,15 @@
         <div class="adj-row"><span>Saturation</span><input type="range" class="slider sm" id="saturation" min="-100" max="100" value="0"/></div>
         <button class="btn-ghost full sm mt" id="resetAdjBtn">↺ Reset</button>
       </div>
+      <!-- TRANSFORM -->
       <div class="opt-sec">
         <div class="opt-lbl">Transform</div>
         <div class="btn-row wrap"><button class="btn-ghost sm" id="rotateLeftBtn">↺ 90°</button><button class="btn-ghost sm" id="rotateRightBtn">↻ 90°</button><button class="btn-ghost sm" id="flipHBtn">↔ H</button><button class="btn-ghost sm" id="flipVBtn">↕ V</button></div>
       </div>
+      <!-- CANVAS OPTIONS -->
       <div class="opt-sec">
-        <div class="opt-lbl">Canvas Options</div>
+        <div class="opt-lbl">Canvas</div>
+        <label class="check-row" style="margin-bottom:8px"><input type="checkbox" id="snapToggle" checked/> Snap to center</label>
         <button class="btn-ghost sm full" id="addBgColorBtn">+ Background Color</button>
         <div class="cust-color-row mt"><span>BG Color</span><input type="color" id="bgColorPick" value="#ffffff"/></div>
         <div class="opt-lbl mt">Add Padding</div>
@@ -244,6 +274,8 @@
       </div>
     </aside>
   </div>
+
+  <!-- FLOAT BAR -->
   <div class="float-bar hidden" id="floatBar">
     <button id="deleteSelBtn" class="fb-btn danger">🗑 Del</button>
     <button id="dupSelBtn" class="fb-btn">⧉ Dupe</button>
@@ -251,25 +283,52 @@
     <button id="bckSelBtn" class="fb-btn">↓ Back</button>
     <button id="lockSelBtn" class="fb-btn">🔓 Lock</button>
   </div>
+
+  <!-- INFO BAR -->
+  <div class="canvas-info-bar" id="infoBarBottom"></div>
 </div>
+
+<!-- CROP MODAL -->
 <div class="modal hidden" id="cropModal">
-  <div class="modal-box"><div class="modal-head"><h3>Crop</h3><button class="modal-x" id="cancelCrop">✕</button></div>
-  <p class="modal-hint">Drag to select area to keep</p>
-  <div class="crop-wrap"><canvas id="cropCanvas"></canvas></div>
-  <div class="modal-foot"><button class="btn-ghost" id="cancelCrop2">Cancel</button><button class="btn-primary" id="applyCrop">Apply</button></div></div>
+  <div class="modal-box">
+    <div class="modal-head"><h3>Crop Image</h3><button class="modal-x" id="cancelCrop">✕</button></div>
+    <div style="padding:10px 18px 4px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--text-muted)">Shape:</span>
+      <button class="crop-shape-btn active" data-shape="rect">▭ Rectangle</button>
+      <button class="crop-shape-btn" data-shape="square">□ Square</button>
+      <button class="crop-shape-btn" data-shape="circle">○ Circle</button>
+    </div>
+    <p class="modal-hint">Drag to select area. Dimensions shown live.</p>
+    <div class="crop-wrap"><canvas id="cropCanvas"></canvas></div>
+    <div class="modal-foot"><button class="btn-ghost" id="cancelCrop2">Cancel</button><button class="btn-primary" id="applyCrop">Apply Crop</button></div>
+  </div>
 </div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu hidden" id="ctxMenu">
+  <button class="ctx-item" id="ctxDupe">⧉ Duplicate</button>
+  <button class="ctx-item" id="ctxFwd">↑ Bring Forward</button>
+  <button class="ctx-item" id="ctxBack">↓ Send Back</button>
+  <button class="ctx-item" id="ctxLock">🔓 Lock</button>
+  <div class="ctx-sep"></div>
+  <button class="ctx-item danger" id="ctxDelete">🗑 Delete</button>
+</div>
+
+<!-- SHORTCUTS MODAL -->
 <div class="modal hidden" id="shortcutsModal">
   <div class="modal-box"><div class="modal-head"><h3>Shortcuts</h3><button class="modal-x" id="closeShortcuts">✕</button></div>
   <div class="sc-grid">
     <div class="sc-row"><kbd>Ctrl+Z</kbd><span>Undo</span></div><div class="sc-row"><kbd>Ctrl+Y</kbd><span>Redo</span></div>
     <div class="sc-row"><kbd>Ctrl+V</kbd><span>Paste image</span></div><div class="sc-row"><kbd>Del</kbd><span>Delete selected</span></div>
     <div class="sc-row"><kbd>Ctrl+D</kbd><span>Duplicate</span></div><div class="sc-row"><kbd>Esc</kbd><span>Deselect</span></div>
-    <div class="sc-row"><kbd>=/-</kbd><span>Zoom</span></div><div class="sc-row"><kbd>0</kbd><span>Fit screen</span></div>
+    <div class="sc-row"><kbd>=/-</kbd><span>Zoom in/out</span></div><div class="sc-row"><kbd>0</kbd><span>Fit screen</span></div>
     <div class="sc-row"><kbd>S</kbd><span>Select</span></div><div class="sc-row"><kbd>P</kbd><span>Pen</span></div>
     <div class="sc-row"><kbd>T</kbd><span>Text</span></div><div class="sc-row"><kbd>B</kbd><span>Blur</span></div>
     <div class="sc-row"><kbd>A</kbd><span>Arrow</span></div><div class="sc-row"><kbd>E</kbd><span>Emoji</span></div>
+    <div class="sc-row"><kbd>Right-click</kbd><span>Context menu</span></div><div class="sc-row"><kbd>Zoom dbl-click</kbd><span>Type zoom %</span></div>
   </div></div>
 </div>
+
 <div class="toast hidden" id="toast"></div>
 <button class="sc-hint" id="shortcutsBtn2">⌨</button>
 <script src="editor.js"></script>
