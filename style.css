@@ -9,7 +9,7 @@ button{cursor:pointer;}
 .screen.active{display:flex;}
 
 /* LANDING — fully centered */
-#landing{align-items:center;justify-content:center;background:var(--bg);overflow:hidden;}
+#landing,#vLanding{align-items:center;justify-content:center;background:var(--bg);overflow:hidden;}
 .landing-bg{position:absolute;inset:0;pointer-events:none;}
 .grid-lines{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:44px 44px;opacity:.4;}
 .glow{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;}
