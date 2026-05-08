@@ -204,6 +204,7 @@ function createLiveOverlay(data) {
     badgeSize: data.badgeSize||Math.max(3,S.strokeSize),
     calloutColor: data.calloutColor||S.color,
     opacity: S.opacity,
+    locked: false, // can be toggled with lock button
     // position as % of canvas so it scales with zoom
     px: data.px||0.5, py: data.py||0.5,
   };
@@ -237,18 +238,40 @@ function renderLiveOverlay(ov) {
   del.addEventListener('click', e => { e.stopPropagation(); deleteLiveOverlay(ov.id); });
   el.appendChild(del);
 
-  // edit button (for text/callout)
+  // edit button (for text/callout) — hidden in CSS until hover/selected
   if (ov.type === 'text' || ov.type === 'callout') {
     const edit = document.createElement('button');
-    edit.className = 'live-edit'; edit.textContent = '✎'; edit.title = 'Edit text';
-    edit.addEventListener('click', e => { e.stopPropagation(); startInlineEdit(ov, inner); });
+    edit.className = 'live-edit'; edit.textContent = '✎'; edit.title = 'Edit text (double-click)';
+    edit.addEventListener('click', e => { e.stopPropagation(); if(!ov.locked)startInlineEdit(ov, inner); });
     el.appendChild(edit);
+  }
+
+  // lock button — hidden in CSS until hover/selected
+  const lockBtn = document.createElement('button');
+  lockBtn.className = 'live-lock';
+  lockBtn.textContent = ov.locked ? '🔒' : '🔓';
+  lockBtn.title = ov.locked ? 'Unlock' : 'Lock';
+  lockBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    ov.locked = !ov.locked;
+    lockBtn.textContent = ov.locked ? '🔒' : '🔓';
+    lockBtn.title = ov.locked ? 'Unlock' : 'Lock';
+    el.classList.toggle('live-locked', ov.locked);
+    saveHistory();
+  });
+  el.appendChild(lockBtn);
+  // apply locked class if already locked
+  if (ov.locked) el.classList.add('live-locked');
+
+  // double-click to edit text inline
+  if (ov.type === 'text' || ov.type === 'callout') {
+    el.addEventListener('dblclick', e => { e.stopPropagation(); if(!ov.locked)startInlineEdit(ov, inner); });
   }
 
   // click to select
   el.addEventListener('click', e => { e.stopPropagation(); selectLiveOverlay(ov); });
 
-  // drag to move
+  // drag to move — respects locked
   makeLiveDraggable(el, ov);
 
   el.style.display = 'flex';
@@ -321,7 +344,8 @@ function styleLiveInner(inner, ov) {
 
 function makeLiveDraggable(el, ov) {
   el.addEventListener('mousedown', e => {
-    if (e.target.classList.contains('live-del') || e.target.classList.contains('live-edit')) return;
+    if (e.target.classList.contains('live-del') || e.target.classList.contains('live-edit') || e.target.classList.contains('live-lock')) return;
+    if (ov.locked) return; // locked — no dragging
     e.preventDefault();
     selectLiveOverlay(ov);
     const layerRect = liveLayer.getBoundingClientRect();
@@ -374,6 +398,8 @@ function deselectLive() {
 }
 
 function deleteLiveOverlay(id) {
+  const ov = S.liveOverlays.find(o=>o.id===id);
+  if (ov?.locked) { showToast('Unlock this overlay first'); return; }
   S.liveOverlays = S.liveOverlays.filter(o => o.id !== id);
   liveLayer.querySelector(`[data-live-id="${id}"]`)?.remove();
   if (S.selectedLive?.id === id) deselectLive();
@@ -573,7 +599,25 @@ function buildShapeObj(tool,sx,sy,ex,ey){
   }
 }
 function moveObj(obj,x,y){const b=getBounds(obj);if(!b)return;const dx=x-b.x-S.dragOffX,dy=y-b.y-S.dragOffY;if('x'in obj&&'y'in obj){obj.x+=dx;obj.y+=dy;}if('x1'in obj){obj.x1+=dx;obj.x2+=dx;obj.y1+=dy;obj.y2+=dy;}if(obj.points)obj.points=obj.points.map(p=>({x:p.x+dx,y:p.y+dy}));S.dragOffX=x-b.x-dx;S.dragOffY=y-b.y-dy;}
-function eraseAt(x,y){const p=S.objects.length;S.objects=S.objects.filter(o=>!hitTest(o,x,y));if(S.objects.length!==p){renderAll();saveHistory();}}
+function eraseAt(x,y){
+  // Erase canvas objects (shapes, blur, arrows etc) — skip locked
+  const p=S.objects.length;
+  S.objects=S.objects.filter(o=>S.lockedObjs.has(o)||!hitTest(o,x,y));
+  // Erase live overlays (text, emoji, callout, counter, letter) — skip locked
+  const lw=mainCanvas.width, lh=mainCanvas.height;
+  const px=x/lw, py=y/lh; // convert canvas coords to % for live layer
+  const toDelete=S.liveOverlays.filter(ov=>{
+    if(ov.locked)return false; // skip locked
+    // hit test: check if eraser is within ~40px of overlay center (in canvas coords)
+    const cx=ov.px*lw, cy=ov.py*lh;
+    return Math.abs(x-cx)<50&&Math.abs(y-cy)<50;
+  });
+  toDelete.forEach(ov=>{
+    S.liveOverlays=S.liveOverlays.filter(o=>o.id!==ov.id);
+    liveLayer.querySelector(`[data-live-id="${ov.id}"]`)?.remove();
+  });
+  if(S.objects.length!==p||toDelete.length>0){renderAll();saveHistory();}
+}
 function pushObj(obj){S.objects.push(obj);S.selectedObj=null;updateFloatBar();renderAll();saveHistory();}
 function updateFloatBar(){$('floatBar').classList.toggle('hidden',!S.selectedObj);}
 
@@ -747,7 +791,10 @@ document.addEventListener('keydown',e=>{
   if(ctrl&&e.key==='z'){e.preventDefault();$('undoBtn').click();}
   if(ctrl&&(e.key==='y'||(e.shiftKey&&e.key==='Z'))){e.preventDefault();$('redoBtn').click();}
   if(ctrl&&e.key==='d'){e.preventDefault();if(S.selectedLive)$('lpDupBtn')?.click();else $('dupSelBtn')?.click();}
-  if((e.key==='Delete'||e.key==='Backspace')){if(S.selectedLive){deleteLiveOverlay(S.selectedLive.id);}else if(S.selectedObj){$('deleteSelBtn').click();}}
+  if((e.key==='Delete'||e.key==='Backspace')){
+    if(S.selectedLive){ if(!S.selectedLive.locked)deleteLiveOverlay(S.selectedLive.id); else showToast('Unlock first'); }
+    else if(S.selectedObj){ $('deleteSelBtn').click(); }
+  }
   if(e.key==='Escape'){S.selectedObj=null;updateFloatBar();renderAll();deselectLive();$('ctxMenu')?.classList.add('hidden');}
   if(e.key==='='||e.key==='+')$('zoomInBtn').click();
   if(e.key==='-')$('zoomOutBtn').click();
