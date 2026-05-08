@@ -186,67 +186,64 @@ button{cursor:pointer;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:3px;}
 
-/* ── LIVE DOM OVERLAYS (image editor) ── */
-.live-layer {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none; overflow: hidden; z-index: 5;
-}
-.live-overlay {
-  position: absolute; pointer-events: all; cursor: move;
-  user-select: none; box-sizing: border-box;
-  display: flex; align-items: center; justify-content: center;
-  border: 1.5px solid transparent; border-radius: 4px;
-  transition: border-color .12s;
-}
-.live-overlay:hover { border-color: rgba(0,199,255,0.5); }
-.live-overlay.live-selected { border-color: #00C7FF !important; }
-.live-overlay-inner {
-  outline: none; cursor: text; white-space: pre-wrap;
-  word-break: break-word; text-align: center; min-width: 20px; min-height: 16px;
-  pointer-events: all;
-}
-.live-overlay-inner[contenteditable="true"] {
-  cursor: text; background: rgba(0,199,255,0.08);
-  border-radius: 3px;
-}
-/* delete button */
-.live-del {
-  position: absolute; top: -10px; right: -10px;
-  width: 22px; height: 22px;
-  background: var(--accent); border-radius: 50%;
-  color: #fff; font-size: 12px; font-weight: 700;
-  border: none; cursor: pointer; line-height: 1;
-  display: none; align-items: center; justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,.3); z-index: 10;
-  pointer-events: all;
-}
-.live-overlay:hover .live-del,
-.live-overlay.live-selected .live-del { display: flex; }
-/* resize handles */
-.live-resize-handle {
-  position: absolute; width: 10px; height: 10px;
-  background: #fff; border: 1.5px solid #00C7FF;
-  border-radius: 50%; z-index: 6; pointer-events: all;
-  display: none;
-}
-.live-overlay.live-selected .live-resize-handle { display: block; }
-.live-resize-handle.br { bottom: -5px; right: -5px; cursor: se-resize; }
-.live-resize-handle.bl { bottom: -5px; left: -5px; cursor: sw-resize; }
-.live-resize-handle.tr { top: -5px; right: -5px; cursor: ne-resize; }
-.live-resize-handle.tl { top: -5px; left: -5px; cursor: nw-resize; }
-/* live panel shown when overlay selected */
-.live-props-panel {
-  position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 12px; padding: 8px 12px;
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  box-shadow: var(--shadow); z-index: 50; pointer-events: all;
-}
-.live-props-panel.hidden { display: none; }
-.lp-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
-.lp-item input[type="color"] { width: 28px; height: 22px; border: none; background: none; cursor: pointer; border-radius: 4px; }
-.lp-item input[type="range"] { width: 70px; }
-.lp-item select { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 2px 5px; font-size: 11px; }
-.lp-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 5px; color: var(--text-muted); font-size: 11px; padding: 3px 7px; cursor: pointer; transition: all .12s; font-weight: 600; }
-.lp-btn:hover { border-color: var(--border-hi); color: var(--text); }
-.lp-btn.active { background: var(--accent-glow); border-color: rgba(255,59,87,.4); color: var(--accent); }
+/* ── CROP SHAPE BUTTONS ── */
+.crop-shape-btn{padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;}
+.crop-shape-btn:hover{border-color:var(--border-hi);color:var(--text);}
+.crop-shape-btn.active{background:var(--accent-glow);border-color:rgba(255,59,87,.4);color:var(--accent);}
+.ctx-menu{position:fixed;background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);z-index:500;min-width:160px;}
+.ctx-menu.hidden{display:none;}
+.ctx-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);padding:9px 14px;font-size:12px;font-family:"DM Sans",sans-serif;cursor:pointer;transition:background .1s;}
+.ctx-item:hover{background:var(--bg3);}
+.ctx-item.danger:hover{background:rgba(255,59,87,.1);color:var(--accent);}
+.ctx-sep{height:1px;background:var(--border);margin:3px 0;}
+.mode-switch-btn,.video-editor-link{display:flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-size:13px;font-weight:500;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);transition:all .15s;}
+.mode-switch-btn:hover,.video-editor-link:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow);}
+.info-bar{position:absolute;top:50px;right:12px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--text-dim);pointer-events:none;z-index:5;}
+
+/* LIVE OVERLAY SYSTEM */
+.live-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:5;}
+.live-overlay{position:absolute;pointer-events:all;cursor:move;user-select:none;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:1.5px solid transparent;border-radius:4px;transition:border-color .12s;}
+/* Hover only — clean border, no buttons visible unless hovered */
+.live-overlay:hover{border-color:rgba(0,199,255,0.35);}
+/* Selected — no border, no buttons, totally clean */
+.live-overlay.live-selected{border-color:transparent;}
+/* Locked — no border ever, cursor change only so you know it's locked */
+.live-overlay.live-locked{border-color:transparent;cursor:not-allowed;}
+/* Locked hover — subtle gold border to indicate locked state */
+.live-overlay.live-locked:hover{border-color:rgba(255,200,0,0.6);}
+.live-overlay-inner{outline:none;cursor:text;white-space:pre-wrap;word-break:break-word;text-align:center;min-width:20px;min-height:16px;pointer-events:all;}
+.live-overlay-inner[contenteditable="true"]{cursor:text;background:rgba(0,199,255,0.08);border-radius:3px;}
+
+/* DELETE button — hidden by default, shows ONLY on hover or selected */
+.live-del{position:absolute;top:-10px;right:-10px;width:22px;height:22px;background:var(--accent);border-radius:50%;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:10;pointer-events:all;}
+/* Show ONLY on hover — never on selected, never when idle */
+.live-overlay:hover .live-del{display:flex;}
+/* Never on locked */
+.live-overlay.live-locked .live-del,.live-overlay.live-selected .live-del{display:none !important;}
+
+/* LOCK button — hidden by default, shows ONLY on hover or selected */
+.live-lock{position:absolute;top:-10px;left:-10px;width:22px;height:22px;background:var(--bg3);border:1px solid var(--border);border-radius:50%;color:var(--text-muted);font-size:11px;border:none;cursor:pointer;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:10;pointer-events:all;transition:all .12s;}
+/* Show ONLY on hover — never on selected, never when idle */
+.live-overlay:hover .live-lock{display:flex;}
+/* When locked: show ONLY on hover with gold tint — hidden when idle */
+.live-overlay.live-locked:hover .live-lock{display:flex;background:rgba(255,200,0,0.15);color:#FFD60A;}
+/* Never on selected, never when idle even if locked */
+.live-overlay.live-selected .live-lock{display:none !important;}
+
+/* EDIT PENCIL button — hidden by default, ONLY shows on hover or selected. FIX: never visible when idle */
+.live-edit{position:absolute;bottom:-10px;right:-10px;width:22px;height:22px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;color:var(--text-muted);font-size:13px;border:none;cursor:pointer;line-height:1;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:10;pointer-events:all;transition:all .12s;}
+/* Show ONLY on hover — never on selected, never when idle */
+.live-overlay:hover .live-edit{display:flex;}
+/* Never on locked, never on selected */
+.live-overlay.live-locked .live-edit,.live-overlay.live-selected .live-edit{display:none !important;}
+
+/* LIVE PROPS PANEL */
+.live-props-panel{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:var(--shadow);z-index:50;pointer-events:all;}
+.live-props-panel.hidden{display:none;}
+.lp-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);}
+.lp-item input[type="color"]{width:28px;height:22px;border:none;background:none;cursor:pointer;border-radius:4px;}
+.lp-item input[type="range"]{width:70px;}
+.lp-item select{background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:2px 5px;font-size:11px;}
+.lp-btn{background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text-muted);font-size:11px;padding:3px 7px;cursor:pointer;transition:all .12s;font-weight:600;}
+.lp-btn:hover{border-color:var(--border-hi);color:var(--text);}
+.lp-btn.active{background:var(--accent-glow);border-color:rgba(255,59,87,.4);color:var(--accent);}
