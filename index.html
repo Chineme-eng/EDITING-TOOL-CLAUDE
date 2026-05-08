@@ -117,6 +117,7 @@
         <div class="canvas-container" id="canvasContainer">
           <canvas id="mainCanvas"></canvas>
           <canvas id="overlayCanvas"></canvas>
+          <div id="liveLayer" class="live-layer"></div>
         </div>
       </div>
     </main>
@@ -330,6 +331,17 @@
 </div>
 
 <div class="toast hidden" id="toast"></div>
+<!-- LIVE OVERLAY PROPS PANEL -->
+<div class="live-props-panel hidden" id="livePropsPanel">
+  <div class="lp-item">Color <input type="color" id="lpColor" value="#ffffff"/></div>
+  <div class="lp-item">Size <input type="range" class="slider" id="lpFontSize" min="8" max="144" value="24" style="width:70px"/><span id="lpFontSizeVal" style="font-size:10px;color:var(--text-muted);min-width:32px">24px</span></div>
+  <div class="lp-item">Font <select id="lpFontFamily"><option value="DM Sans">DM Sans</option><option value="JetBrains Mono">Mono</option><option value="Georgia">Georgia</option><option value="Impact">Impact</option></select></div>
+  <div class="lp-item">Opacity <input type="range" class="slider" id="lpOpacity" min="10" max="100" value="100" style="width:60px"/><span id="lpOpacityVal" style="font-size:10px;color:var(--text-muted)">100%</span></div>
+  <button class="lp-btn" id="lpBoldBtn"><b>B</b></button>
+  <button class="lp-btn" id="lpItalicBtn"><i>I</i></button>
+  <button class="lp-btn" id="lpDupBtn">⧉ Dupe</button>
+  <button class="lp-btn" id="lpDelBtn" style="color:var(--accent)">🗑 Delete</button>
+</div>
 <button class="sc-hint" id="shortcutsBtn2">⌨</button>
 <script src="editor.js"></script>
 </body>
