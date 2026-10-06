@@ -247,3 +247,6 @@ button{cursor:pointer;}
 .lp-btn{background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text-muted);font-size:11px;padding:3px 7px;cursor:pointer;transition:all .12s;font-weight:600;}
 .lp-btn:hover{border-color:var(--border-hi);color:var(--text);}
 .lp-btn.active{background:var(--accent-glow);border-color:rgba(255,59,87,.4);color:var(--accent);}
+
+/* UPSCALE TOOL */
+.tool-btn:disabled{opacity:.5;cursor:wait;}
