@@ -818,7 +818,7 @@ console.log('%ceditр v5 — live overlays ready ✓','color:#FF3B57;font-weight
   if (!btn) return;
   const label = btn.querySelector('span');
   const IDLE_LABEL = label.textContent;
-  const KEEP_SIZE = false; // false = 2x bigger and cleaner | true = same size, cleaner
+  const KEEP_SIZE = true; // false = 2x bigger and cleaner | true = same size, cleaner
   let upscaler = null, busy = false;
 
   async function getUpscaler() {
