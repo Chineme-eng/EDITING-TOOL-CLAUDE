@@ -811,3 +811,67 @@ function showToast(msg,ms=2400){const t=$('toast');t.textContent=msg;t.classList
 // INIT LIVE PROPS BINDINGS
 bindLiveProps();
 console.log('%ceditр v5 — live overlays ready ✓','color:#FF3B57;font-weight:bold;font-size:13px');
+
+// ── UPSCALE 2x (AI, runs in-browser) ───────────────────────
+(function () {
+  const btn = document.getElementById('upscaleBtn');
+  if (!btn) return;
+  const label = btn.querySelector('span');
+  const IDLE_LABEL = label.textContent;
+  let upscaler = null, busy = false;
+
+  async function getUpscaler() {
+    if (upscaler) return upscaler;
+    // Loaded on first click only, so the editor itself stays light.
+    const [{ default: Upscaler }, { default: model }] = await Promise.all([
+      import('https://cdn.jsdelivr.net/npm/upscaler/+esm'),
+      import('https://cdn.jsdelivr.net/npm/@upscalerjs/default-model/+esm'),
+    ]);
+    upscaler = new Upscaler({ model });
+    return upscaler;
+  }
+
+  btn.addEventListener('click', async () => {
+    if (busy) return;
+    if (!S.sourceImage) { showToast('Open an image first'); return; }
+
+    const mp = (mainCanvas.width * mainCanvas.height) / 1e6;
+    if (mp > 2 && !confirm(`This image is ${mp.toFixed(1)} MP — upscaling may take a while and use a lot of memory. Continue?`)) return;
+
+    busy = true; btn.disabled = true; label.textContent = 'Loading…';
+    try {
+      const up = await getUpscaler();
+
+      // Bake filters, shapes, text etc. into one flat image
+      S.selectedObj = null; renderAll();
+      const flat = flatCanvas();
+
+      const dataUrl = await up.upscale(flat, {
+        patchSize: 64, padding: 4, // tiled processing keeps memory low
+        progress: p => { label.textContent = Math.round(p * 100) + '%'; },
+      });
+
+      const img = new Image();
+      img.onload = () => {
+        S.sourceImage = img;
+        S.objects = []; S.liveOverlays = []; S.selectedLive = null; S.lockedObjs.clear();
+        if (liveLayer) liveLayer.innerHTML = '';
+        S.rotation = 0; S.flipH = false; S.flipV = false; S.sourceFilter = 'none';
+        S.brightness = S.contrast = S.saturation = 0;
+        ['brightness', 'contrast', 'saturation'].forEach(p => $(p).value = 0);
+        document.querySelectorAll('.filt2-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'none'));
+        resizeCanvases(img.width, img.height); fitZoom(); renderAll(); saveHistory();
+        showToast(`Upscaled to ${img.width}×${img.height}px ✓`, 3500);
+        reset();
+      };
+      img.onerror = () => { showToast('Upscale failed'); reset(); };
+      img.src = dataUrl;
+    } catch (err) {
+      console.error(err);
+      showToast('Upscale failed — needs WebGL + internet on first use', 4000);
+      reset();
+    }
+  });
+
+  function reset() { busy = false; btn.disabled = false; label.textContent = IDLE_LABEL; }
+})();
